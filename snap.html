@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+    <style>
+        video, canvas { width: 100%; max-width: 500px; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay playsinline></video>
+    <button id="swapCamera">Swap Camera</button>
+    <button id="capture">Capture</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <img id="photo" style="display: none;">
+    <p id="resultText"></p>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let photo = document.getElementById('photo');
+        let resultText = document.getElementById('result');
+        let swapButton = document.getElementById('swapCamera');
+        let captureButton = document.getElementById('capture');
+        let currentFacingMode = 'user';
+
+        let currentStream = null;
+
+        async function startCamera(facingMode = 'user') {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // Stop previous camera
+            }
+
+            try {
+                let devices = await navigator.mediaDevices.enumerateDevices();
+                let videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                let selectedDeviceId = null;
+
+                if (facingMode === 'environment') {
+                    selectedDeviceId = videoDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId;
+                } else {
+                    selectedDeviceId = videoDevices.find(device => device.label.toLowerCase().includes('front'))?.deviceId;
+                }
+
+                let constraints = {
+                    video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { facingMode }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+            }
+        }
+
+        swapButton.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera(currentFacingMode);
+        });
+
+        captureButton.addEventListener('click', async () => {
+            let context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(async (blob) => {
+                let file = new File([blob], "captured.png", { type: "image/png" });
+                photo.src = URL.createObjectURL(blob);
+                photo.style.display = 'block';
+
+                await sendToServer(file);
+            }, 'image/png');
+        });
+
+        async function sendToServer(file) {
+    let formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        let response = await fetch("/", {
+            method: "POST",
+            body: formData
+        });
+
+        let resultText = document.getElementById("resultText"); // Ensure this element exists
+
+        if (response.ok) {
+            let responseData = await response.json(); // Correct way to get response text
+            resultText.textContent = "Image uploaded successfully222! " + responseData["message"];
+        } else {
+            let errorText = await response.text();
+            resultText.textContent = "Upload failed: " + errorText;
+        }
+    } catch (error) {
+        resultText.textContent = "Error: " + error.message;
+    }
+}
+        startCamera();
+    </script>
+</body>
+</html>

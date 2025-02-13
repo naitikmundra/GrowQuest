@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bungee Banner</title>
+    <style>
+/* RESET/BASIC STYLES
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+:root {
+  --white: #ffffff;
+  --light-grey:#42aee6;
+  --violet: #176337;
+  --dark-violet: black;
+  --black: #21232a;
+  --foreg: #9b554d;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  text-align: center;
+height: 100vh;
+  padding: 0 20px;
+
+
+background: radial-gradient( #ffea95, #dfd46b) !important; 
+  color: var(--white);
+}
+
+.notification {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  background: var(--violet);
+}
+
+/* MAIN STYLES
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  max-width: 400px;
+
+  border-radius: 5px 5px 25px 25px;
+  background: transparent;
+
+  box-shadow: rgb(50 50 93 / 10%) 0 30px 60px -12px,
+    rgb(0 0 0 / 15%) 0 18px 36px -18px;
+color:black;
+}
+.nav [type="checkbox"] {
+  position: absolute;
+  left: -9999px;
+}
+
+.nav [type="checkbox"] + label {
+  position: relative;
+  width: 75px;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 1;
+  background: var(--foreg);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition: all 0.2s;
+background-image: radial-gradient(#fcc17b,#9b554d);
+
+}
+
+.nav [type="checkbox"] + label:hover {
+  background: var(--dark-violet);
+color:white;
+}
+
+.menu li {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.4s;
+}
+
+.menu li:nth-child(1) {
+  transition-delay: 0.2s;
+}
+
+.menu li:nth-child(2) {
+  transition-delay: 0.15s;
+}
+
+.menu li:nth-child(3) {
+  transition-delay: 0.1s;
+}
+
+.menu li:nth-child(4) {
+  transition-delay: 0.05s;
+}
+
+.menu li a {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--foreg);
+}
+
+.menu li a span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(calc(-100% - 5px));
+  width: 100%;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  color: var(--black);
+  font-weight: bold;
+}
+
+.nav input:checked + label {
+  background: var(--black);
+  transform: translateY(calc(-50% + 4px));
+}
+
+.nav input:checked ~ .menu li:nth-child(1) {
+  top: -220px;
+  transition-delay: 0.1s;
+}
+
+.nav input:checked ~ .menu li:nth-child(2) {
+  top: -160px;
+  left: calc(50% - 75px);
+  transition-delay: 0.2s;
+}
+
+.nav input:checked ~ .menu li:nth-child(3) {
+  top: -160px;
+  left: calc(50% + 75px);
+  transition-delay: 0.3s;
+}
+
+.nav input:checked ~ .menu li:nth-child(4) {
+  top: -100px;
+  transition-delay: 0.4s;
+}
+
+.nav input:checked ~ .menu li a span {
+  opacity: 1;
+  transition-delay: 0.9s;
+}
+
+
+
+
+
+
+.button {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-width: 0;
+  padding: 0 8px 12px;
+  min-width: 10em;
+  box-sizing: border-box;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+
+.button-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 0;
+  padding: 8px 16px;
+  transform: translateY(0);
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 -1px rgba(0, 0, 0, .25);
+  transition-property: transform;
+  transition-duration: .2s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.button:active .button-top {
+  transform: translateY(6px);
+}
+
+.button-top::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  box-sizing: content-box;
+  background-image: radial-gradient(#fcc17b,#9b554d);
+  text-align: center;
+  color: #80CED7;
+  box-shadow: inset 0 0 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2);
+  transition-property: border-radius, padding, width, transform;
+  transition-duration: .2s;
+}
+
+.button:active .button-top::after {
+  border-radius: 6px;
+  padding: 0 2px;
+}
+
+.button-bottom {
+  position: absolute;
+  z-index: -1;
+  bottom: 4px;
+  left: 4px;
+  border-radius: 8px / 16px 16px 8px 8px;
+  padding-top: 6px;
+  width: calc(100% - 8px);
+  height: calc(100% - 10px);
+  box-sizing: content-box;
+  background-color: #caf6dc;
+  background-image: radial-gradient(4px 8px at 4px calc(100% - 8px), rgba(255, 255, 255, .25), transparent), radial-gradient(4px 8px at calc(100% - 4px) calc(100% - 8px), rgba(255, 255, 255, .25), transparent), radial-gradient(16px at -4px 0, white, transparent), radial-gradient(16px at calc(100% + 4px) 0, white, transparent);
+  box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.5), inset 0 -1px 3px 3px rgba(0, 0, 0, .4);
+  transition-property: border-radius, padding-top;
+  transition-duration: .2s;
+}
+
+.button:active .button-bottom {
+  border-radius: 10px 10px 8px 8px / 8px;
+  padding-top: 0;
+}
+
+.button-base {
+  position: absolute;
+  z-index: -2;
+  top: 4px;
+  left: 0;
+  border-radius: 12px;
+  width: 100%;
+  height: calc(100% - 4px);
+  background-color: rgba(0, 0, 0, .15);
+  box-shadow: 0 1px 1px 0 rgba(255, 255, 255, .75), inset 0 2px 2px rgba(0, 0, 0, .25);
+}
+
+
+.logo{
+position:fixed;
+ top:20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.box {
+  position: fixed;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+h3 {
+ font-family: 'Brush Script MT', cursive;
+  font-size:50px;
+white-space: nowrap;
+
+  line-height: 50px;
+  color: var(--foreg);
+
+  letter-spacing: -1px;
+}
+
+h3:hover {
+  animation: glitch .3s linear infinite;
+  cursor: pointer;
+}
+
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+@media (max-width: 600px) {
+h3{
+white-space: normal;
+font-size:20px;
+}
+.box{
+top:65%;
+}
+}
+    </style>
+</head>
+
+	  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    console.log("init");
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBliB_2PvJ4UpQaTy0IEL7B6dgUYZb0OX4",
+        authDomain: "growquest-b6385.firebaseapp.com",
+        projectId: "growquest-b6385",
+        storageBucket: "growquest-b6385.firebasestorage.app",
+        messagingSenderId: "923139036173",
+        appId: "1:923139036173:web:3f448a167c6cc114bf3144",
+        measurementId: "G-S8SRCZ1YVG"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+window.googleLogin = function () {  
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+    // Open the popup immediately
+    signInWithPopup(auth, provider)
+        .then(result => {
+            const user = result.user;
+            return fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: user.uid, email: user.email })
+            });
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log("gotit");
+          window.location.href = data.message;
+        })
+        .catch(error => {
+            console.error("Error:", error);
+           
+        });
+}
+</script>
+
+<body>
+<img class="logo" src="grow.png">
+<button onclick = "googleLogin()" type="button" class="button">
+  <div class="button-top">Let's Go!</div>
+  <div class="button-bottom"></div>
+  <div class="button-base"></div>
+
+</button>
+
+<div class='box'>
+<h3>Learn to grow, Grow to give, Donate something priceless!🍌</h3></div>
+
+<nav class="nav">
+  <input id="menu" type="checkbox">
+  <label for="menu"></label>
+  <ul class="menu">
+    <li>
+      <a href="#0">
+        <span>Snap</span>
+        <i class="fas fa-address-card" aria-hidden="true"></i>
+      </a>
+    </li>
+    <li>
+      <a href="#0">
+        <span>Profile</span>
+        <i class="fas fa-tasks" aria-hidden="true"></i>
+      </a>
+    </li>
+    <li>
+      <a href="#0">
+        <span>About</span>
+        <i class="fas fa-users" aria-hidden="true"></i>
+      </a>
+    </li>
+    <li>
+      <a href="#0">
+        <span>Contact</span>
+        <i class="fas fa-envelope-open-text" aria-hidden="true"></i>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+</body>
+</html>

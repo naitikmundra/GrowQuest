@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrowQuest</title>
+    <style>
+*,
+*:after,
+*:before {
+	box-sizing: border-box;
+	transform-style: preserve-3d;
+}
+
+body {
+	display: grid;
+	place-items: center;
+	min-height: 100vh;
+	font-family:  'Google Sans', sans-serif, system-ui;
+}
+
+:root {
+	--size: 120;
+	--coefficient: 1px;
+	--timeline: 2.6s;
+	--delay: 0.65s;
+  --rotation-y: -24;
+  --rotation-x: 28;
+  --color-one: #3a0ca3;
+  --color-two: #4361ee;
+  --color-three: #4cc9f0;
+}
+
+.scene {
+  position: relative;
+  transform: translate3d(0, 0, 100vmin) rotateX(calc(var(--rotation-y, 0) * 1deg)) rotateY(calc(var(--rotation-x, 0) * 1deg)) rotateX(0deg);
+}
+
+
+
+@keyframes scale {
+  0%, 10% {
+    transform: scaleX(1) scaleY(1);
+  }
+	35%, 100% {
+		transform: scaleX(0.5) scaleY(0.5);
+	}
+}
+
+.shadow {
+	width: calc(var(--size) * var(--coefficient));
+	position: absolute;
+	bottom: 0;
+	aspect-ratio: 1;
+	transform-origin: 50% 50%;
+	background: hsl(210 80% 50% / 0.2);
+	transform: rotateX(90deg) translate3d(0, 0, calc((var(--size) * (var(--coefficient) * -0.5)) - 1px)) scale(0.96);
+	animation: squish-squosh var(--timeline) var(--delay) infinite, fade var(--timeline) var(--delay) infinite;
+	background: black;
+}
+
+.loader {
+	--depth: var(--size);
+	--color: var(--color-one, #8338EC);
+	width: calc(var(--depth) * var(--coefficient));
+	aspect-ratio: 1;
+	transform-origin: 50% 50%;
+	animation: squish-squosh var(--timeline) var(--delay) infinite;
+}
+
+.spinner {
+	animation: spin var(--timeline) var(--delay) infinite;
+}
+
+.jumper {
+	animation: jump var(--timeline) var(--delay) infinite;
+}
+
+@keyframes squish-squosh {
+	0%, 50%, 60% {
+		scale:  1 1 1;
+	}
+	10%, 35% {
+		scale: 1.2 0.8 1.2;
+	}
+	25% {
+		scale: 0.8 1.2 0.8;
+	}
+	70% {
+		scale: 1 1 2;
+	}
+	80% {
+		scale: 2 1 2;
+	}
+	90%, 100% {
+		scale: 2 2 2;
+	}
+}
+
+
+@keyframes fade {
+	0%, 10%, 40%, 50%, 60%, 100% {
+		opacity: 1;
+	}
+	25% {
+		opacity: 0.5;
+	}
+}
+
+@keyframes spin {
+	0%, 10% { rotate: 0deg; }
+	30%, 100% { rotate: -360deg; }
+}
+@keyframes jump {
+	0%, 10%, 35%, 50% {
+		translate: 0 0;
+	}
+	25% {
+		translate: 0 -150%;
+	}
+}
+
+/* Cuboid boilerplate code */
+.cuboid {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.cuboid__side {
+  background: var(--color);
+  position: absolute;
+}
+.cuboid__side:nth-of-type(1) {
+  --b: 1.1;
+  height: calc(var(--depth, 20) * var(--coefficient));
+  width: 100%;
+  top: 0;
+  transform: translate(0, -50%) rotateX(90deg);
+}
+.cuboid__side:nth-of-type(2) {
+  --b: 0.9;
+  --color: var(--color-three, #FF006E);
+  height: 100%;
+  width: calc(var(--depth, 20) * var(--coefficient));
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%) rotateY(90deg);
+}
+.cuboid__side:nth-of-type(3) {
+  --b: 1;
+  width: 100%;
+  height: calc(var(--depth, 20) * var(--coefficient));
+  bottom: 0;
+  transform: translate(0%, 50%) rotateX(90deg);
+}
+.cuboid__side:nth-of-type(4) {
+  --b: 1;
+  --color: var(--color-three, #FF006E);
+  height: 100%;
+  width: calc(var(--depth, 20) * var(--coefficient));
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%) rotateY(90deg);
+}
+.cuboid__side:nth-of-type(5) {
+  --b: 1;
+  --color: var(--color-two, #3A86EF);
+  height: 100%;
+  width: 100%;
+  transform: translate3d(0, 0, calc(var(--depth, 20) * (var(--coefficient) * 0.5)));
+  top: 0;
+  left: 0;
+}
+.cuboid__side:nth-of-type(6) {
+  --b: 1.2;
+  height: 100%;
+  width: 100%;
+  transform: translate3d(0, 0, calc(var(--depth, 20) * (var(--coefficient) * -0.5))) rotateY(180deg);
+  top: 0;
+  left: 0;
+}
+
+    </style>
+</head>
+<script>
+function getCountryFromLocation() {
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+               const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+               const data = await response.json();
+                const country = data.address.country;
+
+               //Send country to Flask
+                fetch('/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ country })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const dataElement = document.getElementById("data");
+                    if (data.error) {
+                        dataElement.innerText = "Error: " + data.error;
+                    } else {
+                        dataElement.innerText = `Plant: ${data.name}\nScientific Name: ${data.scientific_name}\nDays to Harvest: ${data.days_to_harvest}\nSoil Types: ${data.soil.join(", ")}\nTips: ${data.tips}`;
+			document.getElementById('id01').style.display='block'                    
+}
+                })
+                .catch(error => {
+                    console.error("Error sending data:", error);
+                    document.getElementById("data").innerText = "Failed to retrieve data.";
+                });
+
+            } catch (error) {
+                console.error("Geocoding failed:", error);
+                document.getElementById("data").innerText = "Geolocation error.";
+            }
+        },
+        (error) => {
+            console.error("Error getting location:", error);
+            document.getElementById("data").innerText = "Location permission denied.";
+        }
+    );
+}
+
+function sendIndiaPostRequest() {
+    fetch('/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({country: "India" })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const dataElement = document.getElementById("data");
+        if (data.error) {
+            dataElement.innerText = "Error: " + data.error;
+        } else {
+            dataElement.innerText = `Plant: ${data.name}\nScientific Name: ${data.scientific_name}\nDays to Harvest: ${data.days_to_harvest}\nSoil Types: ${data.soil.join(", ")}`;
+document.querySelector('.scene').style.display = 'none';
+	    
+document.getElementById('id01').style.display='block'        
+ }
+    })
+    .catch(error => {
+        console.error("Error sending data:", error);
+        document.getElementById("data").innerText = "Failed to retrieve data.";
+    });
+}
+
+// Call function
+sendIndiaPostRequest();
+</script>
+<body>
+<div class="scene">
+  <div class="shadow"></div>
+  <div class="jumper">
+    <div class="spinner">
+      <div class="scaler">
+        <div class="loader">
+          <div class="cuboid">
+            <div class="cuboid__side"></div>
+            <div class="cuboid__side"></div>
+            <div class="cuboid__side"></div>
+            <div class="cuboid__side"></div>
+            <div class="cuboid__side"></div>
+            <div class="cuboid__side"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+  <div id="id01" class="w3-modal">
+    <div class="w3-modal-content">
+      <div class="w3-container">
+        <p id="dta">Here is the plant choosen for you!</p>
+	<p id="data">Here is the plant choosen for you!</p>
+<button onclick="location.reload()">Unsatisfied? Choose Again!</button>
+
+<button onclick="window.location.href='/home'">Lets Go!</button>
+
+
+
+
+
+
+      </div>
+
+    </div>
+  </div>
+</div>
+<p id="data">Fetching your location</p>
+</body>
+</html>
