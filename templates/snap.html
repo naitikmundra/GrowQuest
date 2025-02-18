@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+    <style>
+        video, canvas { width: 100%; max-width: 500px; }
+        button { margin: 5px; padding: 10px; }
+        html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+}
+
+#video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+}
+#photo{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+}
+#capture {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 18px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#swapCamera {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background: gray;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+    </style>
+</head>
+<body>
+    <video id="video" autoplay playsinline></video>
+    <button id="swapCamera">Swap Camera</button>
+    <button id="capture">Capture</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <img id="photo" style="display: none;">
+    <p id="resultText"></p>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let photo = document.getElementById('photo');
+        let resultText = document.getElementById('result');
+        let swapButton = document.getElementById('swapCamera');
+        let captureButton = document.getElementById('capture');
+        let currentFacingMode = 'user';
+
+        let currentStream = null;
+
+        async function startCamera(facingMode = 'user') {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // Stop previous camera
+            }
+
+            try {
+                let devices = await navigator.mediaDevices.enumerateDevices();
+                let videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                let selectedDeviceId = null;
+
+                if (facingMode === 'environment') {
+                    selectedDeviceId = videoDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId;
+                } else {
+                    selectedDeviceId = videoDevices.find(device => device.label.toLowerCase().includes('front'))?.deviceId;
+                }
+
+                let constraints = {
+                    video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { facingMode }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+            }
+        }
+
+        swapButton.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera(currentFacingMode);
+        });
+
+        captureButton.addEventListener('click', async () => {
+            let context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(async (blob) => {
+                let file = new File([blob], "captured.png", { type: "image/png" });
+                photo.src = URL.createObjectURL(blob);
+                photo.style.display = 'block';
+
+                await sendToServer(file);
+            }, 'image/png');
+        });
+
+        async function sendToServer(file) {
+    let formData = new FormData();
+    formData.append("image", file);
+
+    try {
+    let response = await fetch("/snap", {
+        method: "POST",
+        body: formData
+    });
+
+    if (response.ok) {
+        let data = await response.json(); // Parse JSON response
+
+        if (confirm("Do you want to proceed with this pic? " + data.message)) {
+            console.log("Red1");
+            location.href = "/home";
+        } else {
+            console.log("Red2");
+            location.href = "/snap";
+        }
+    } else {
+        console.log("Red3");
+        let errorText = await response.text();
+        console.error("Error response:", errorText);
+        location.href = "/home";
+    }
+} catch (error) {
+    console.error("Error:", error);
+    location.href = "/home";
+}
+}
+        startCamera();
+    </script>
+</body>
+</html>
