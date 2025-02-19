@@ -12,7 +12,7 @@ app = Flask(__name__, static_folder="assets")
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory("assets", filename)
-# Configure session to use filesystem (better security)
+
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
 Session(app)
@@ -114,8 +114,7 @@ def login():
 @login_required_with_plant
 def snap():
     if request.method == 'POST':
-        # Define API URL and API key
-        API_KEY = "2b10YJA9kuFR0zpHEyfyRUeO"  # Replace with your actual API key
+        API_KEY = ""  # Replace with your actual API key
         PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all"
 
         # Open the image file you want to send
